@@ -1,4 +1,5 @@
 import sqlite3
+import os
 from typing import List, Dict
 
 DATABASE_NAME = 'events'
@@ -11,38 +12,39 @@ def create_tables():
     cur = conn.cursor()
 
     query = '''
-    CREATE TABLE IF NOT EXISTS events (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name VARCHAR(50) NOT NULL UNIQUE,
-        time VARCHAR(5)) NOT NULL
+    CREATE TABLE events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL,
+    time VARCHAR(5) NOT NULL,
+    UNIQUE(name)
     )
     '''
     cur.execute(query)
 
     query = '''
-    CREATE TABLE IF NOT EXISTS queries (
-        event_id INTEGER,
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name VARCHAR(50) NOT NULL,
-        type VARCHAR(4)) NOT NULL CHECK (type IN ('text', 'bool')),
+    CREATE TABLE queries (
+    event_id INTEGER,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(50) NOT NULL,
+    type VARCHAR(4) NOT NULL CHECK (type IN ('text', 'bool')),
 
-        FOREIGN KEY (event_id) REFERENCES events(id),
-        UNIQUE(event_id, id)
+    FOREIGN KEY (event_id) REFERENCES events(id),
+    UNIQUE(event_id, id)
     )
     '''
     cur.execute(query)
 
     query = '''
-    CREATE TABLE IF NOT EXISTS entries (
-        event_id INTEGER,
-        query_id INTEGER PRIMARY KEY AUTOINCREMENT,
+    CREATE TABLE entries (
+    event_id INTEGER,
+    query_id INTEGER PRIMARY KEY AUTOINCREMENT,
 
-        date VARCHAR(8) NOT NULL,
-        input TEXT,
+    date VARCHAR(8) NOT NULL,
+    input TEXT,
 
-        UNIQUE(event_id, query_id, date),
-        FOREIGN KEY (event_id) REFERENCES events(id),
-        FOREIGN KEY (query_id) REFERENCES queries(id)
+    UNIQUE(event_id, query_id, date),
+    FOREIGN KEY (event_id) REFERENCES events(id),
+    FOREIGN KEY (query_id) REFERENCES queries(id)
     )
     '''
     cur.execute(query)
@@ -50,8 +52,12 @@ def create_tables():
     conn.commit()
     conn.close()
 
-if __name__ == "__main__":
+def destroy_database():
+    if os.path.exists(f'{DATABASE_NAME}.db'):
+        os.remove(f'{DATABASE_NAME}.db')
 
+if __name__ == "__main__":
+    destroy_database() 
     create_tables()
 
 
@@ -60,19 +66,20 @@ def insert_event(name: str, time: str, queries: List[Dict]):
     cur = conn.cursor()
 
     event_query ='''
-        INSERT OR IGNORE INTO events (name)
+        INSERT INTO events (name, time)
         VALUES (?, ?)
     '''
     event_values = (name, time)
     cur.execute(event_query, event_values)
+    event_id = cur.lastrowid
 
     for query in queries:
         # :)
         query_query = '''
-            INSERT OR IGNORE INTO events (name)
-            VALUES (?, ?)
+            INSERT INTO queries (event_id, name, type)
+            VALUES (?, ?, ?)
         '''
-        query_values = (query['date'], query['time'])
+        query_values = (event_id, query['name'], query['type'])
         cur.execute(query_query, query_values)
 
     conn.commit()

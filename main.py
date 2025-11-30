@@ -24,7 +24,7 @@ from datetime import datetime
 
 def create_event():
 
-    name = fancy_input('Provide a name for the query', 'Create Event')
+    name = fancy_input('Provide a name for the event', 'Create Event')
     time = fancy_input('At what time will the even trigger?', 'Create Event')
     num_queries = int(fancy_input('How many queries?', 'Create Event'))
 
@@ -46,4 +46,7 @@ def check_time():
 
 if __name__ == "__main__":
 
-    create_event()
+    #create_event()
+    insert_event('wake up', '07:30', 
+        [{'name': 'dream journal', 'type': 'text'},
+         {'name': 'dream tarcker', 'type': 'bool'}])

@@ -4,7 +4,7 @@ from rich.panel import Panel
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
 
-from database import insert_event, get_events
+import database as db
 
 STYLE = 'white on blue'
 
@@ -35,7 +35,7 @@ def create_event():
         queries.append({'name': q_name, 'type':q_type})
 
     # Add to database
-    insert_event(name, time, queries)
+    db.insert_event(name, time, queries)
 
 def check_time():
     '''
@@ -44,11 +44,20 @@ def check_time():
     return List[]
     '''
 
-    # Get all event_ids + times
-    data = get_events()
-    print(data)
+    # Get all event_ids + times, that haven't triggred today
+    events = db.get_untriggered_events()
 
+    # Create list of events to trigger
+    now = datetime.now().time()
+    now = int(str(now.hour) + str(now.minute))
 
+    trig_events = []
+    for id, time in events:
+        if time <= now:
+            trig_events.append(id)
+
+    return trig_events
+    
 
 def run_event(event):
     pass
@@ -56,8 +65,17 @@ def run_event(event):
 if __name__ == "__main__":
 
     #create_event()
-    insert_event('wake up', 730, 
+    db.insert_event('wake up', 730, 
         [{'name': 'dream journal', 'type': 'text'},
          {'name': 'dream tarcker', 'type': 'bool'}])
     
-    check_time()
+    db.insert_event('mid-day', 1300, 
+        [{'name': 'day journal', 'type': 'text'},
+         {'name': 'meditation tracker', 'type': 'bool'}])
+    
+    
+    db.insert_event('wind down', 2100, 
+        [{'name': 'day journal', 'type': 'text'},
+         {'name': 'meditation tracker', 'type': 'bool'}])
+    
+    print(check_time())

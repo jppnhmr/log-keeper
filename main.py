@@ -3,6 +3,7 @@ from rich.panel import Panel
 
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
+from prompt_toolkit.completion import WordCompleter
 
 import database as db
 
@@ -57,10 +58,31 @@ def check_time():
             trig_events.append(id)
 
     return trig_events
-    
 
-def run_event(event):
-    pass
+def run_query(query):
+    user_input = None
+    console = Console()
+    if query['type'] == 'text':
+        console.print(f"[bold blue]{query['name']}: [/bold blue]")
+        user_input = prompt('>> ')
+    else:
+        while user_input != 'True' and user_input != 'False':
+            console.print(f"[bold blue]{query['name']}[/bold blue]")
+            completer = WordCompleter(['True', 'False'], ignore_case=True)
+            user_input = prompt('>> ', completer=completer)
+     
+        user_input = user_input.lower() == 'true'
+
+    return user_input
+
+def run_event(event_id):
+
+    queries = db.get_event_queries(event_id)
+
+    for q in queries:
+        usr_input = run_query(q)
+        db.insert_entry(event_id, q['id'], usr_input)
+
 
 if __name__ == "__main__":
 
@@ -78,4 +100,6 @@ if __name__ == "__main__":
         [{'name': 'day journal', 'type': 'text'},
          {'name': 'meditation tracker', 'type': 'bool'}])
     
-    print(check_time())
+    events = check_time()
+    for event_id in events:
+        run_event(event_id)

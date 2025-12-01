@@ -4,7 +4,7 @@ from rich.panel import Panel
 from prompt_toolkit import prompt
 from prompt_toolkit.styles import Style
 
-from database import insert_event
+from database import insert_event, get_events
 
 STYLE = 'white on blue'
 
@@ -44,9 +44,20 @@ def check_time():
     return List[]
     '''
 
+    # Get all event_ids + times
+    data = get_events()
+    print(data)
+
+
+
+def run_event(event):
+    pass
+
 if __name__ == "__main__":
 
     #create_event()
-    insert_event('wake up', '07:30', 
+    insert_event('wake up', 730, 
         [{'name': 'dream journal', 'type': 'text'},
          {'name': 'dream tarcker', 'type': 'bool'}])
+    
+    check_time()

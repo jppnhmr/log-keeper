@@ -15,7 +15,7 @@ def create_tables():
     CREATE TABLE events (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name VARCHAR(50) NOT NULL,
-    time VARCHAR(5) NOT NULL,
+    time INTEGER NOT NULL,
     UNIQUE(name)
     )
     '''
@@ -61,12 +61,12 @@ if __name__ == "__main__":
     create_tables()
 
 
-def insert_event(name: str, time: str, queries: List[Dict]):
+def insert_event(name: str, time: int, queries: List[Dict]):
     conn = connect()
     cur = conn.cursor()
 
     event_query ='''
-        INSERT INTO events (name, time)
+        INSERT OR IGNORE INTO events (name, time)
         VALUES (?, ?)
     '''
     event_values = (name, time)
@@ -76,7 +76,7 @@ def insert_event(name: str, time: str, queries: List[Dict]):
     for query in queries:
         # :)
         query_query = '''
-            INSERT INTO queries (event_id, name, type)
+            INSERT OR IGNORE INTO queries (event_id, name, type)
             VALUES (?, ?, ?)
         '''
         query_values = (event_id, query['name'], query['type'])
@@ -85,3 +85,15 @@ def insert_event(name: str, time: str, queries: List[Dict]):
     conn.commit()
     conn.close()
 
+def get_events():
+    conn = connect()
+    cur = conn.cursor()
+
+    query = '''
+    SELECT id, time FROM events
+    '''
+    cur.execute(query)
+    data = cur.fetchall()
+
+    conn.close()
+    return data 

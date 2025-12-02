@@ -38,9 +38,9 @@ def create_event():
     # Add to database
     db.insert_event(name, time, queries)
 
-def check_time():
+def get_events_to_trigger():
     '''
-    Check database for events that can be triggered
+    Check database for events that are at or beyond their trigger time
 
     return List[]
     '''
@@ -83,23 +83,27 @@ def run_event(event_id):
         usr_input = run_query(q)
         db.insert_entry(event_id, q['id'], usr_input)
 
-
-if __name__ == "__main__":
-
-    #create_event()
+def create_example_events():
     db.insert_event('wake up', 730, 
         [{'name': 'dream journal', 'type': 'text'},
-         {'name': 'dream tarcker', 'type': 'bool'}])
+        {'name': 'dream tarcker', 'type': 'bool'}])
     
     db.insert_event('mid-day', 1300, 
-        [{'name': 'day journal', 'type': 'text'},
-         {'name': 'meditation tracker', 'type': 'bool'}])
-    
+        [{'name': 'check in', 'type': 'text'}])
     
     db.insert_event('wind down', 2100, 
         [{'name': 'day journal', 'type': 'text'},
          {'name': 'meditation tracker', 'type': 'bool'}])
-    
-    events = check_time()
+
+if __name__ == "__main__":
+    '''
+    This script will be run every 10 minutes.
+    Creates a popup for each event, presenting the queries
+    and saving the resultst to the database.    
+    '''
+
+    create_example_events()
+
+    events = get_events_to_trigger()
     for event_id in events:
         run_event(event_id)

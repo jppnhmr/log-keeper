@@ -102,8 +102,12 @@ if __name__ == "__main__":
     and saving the resultst to the database.    
     '''
 
+    print("Running...")
+
     create_example_events()
 
     events = get_events_to_trigger()
     for event_id in events:
         run_event(event_id)
+
+    print("...Finished")
